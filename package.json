@@ -1,0 +1,18 @@
+{
+  "name": "html",
+  "version": "1.0.0",
+  "description": "change file traffic_web.sh monthly.",
+  "main": "jquery-3.6.0.min.js",
+  "dependencies": {
+    "blueimp-file-upload": "^10.32.0",
+    "formidable": "^2.0.1",
+    "jquery": "^3.6.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

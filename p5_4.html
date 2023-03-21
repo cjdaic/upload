@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>My first p5.js app</title>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+    <script src="https://cdn.jsdelivr.net/npm/oscilloscope@1.x/dist/oscilloscope.min.js"></script>
+	</head>
+	<body>
+    
+    <script>
+    var Oscilloscope = require('oscilloscope')
+  
+    var audioContext = new window.AudioContext()
+    
+    // create source from html5 audio element
+    var source = audioContext.createMediaElementSource(audioElement)
+    
+    // attach oscilloscope
+    var scope = new Oscilloscope(source)
+    
+    // start default animation loop
+    scope.animate(canvas.getContext("2d"))
+    </script>
+	</body>
+</html>

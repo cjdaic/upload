@@ -1,0 +1,67 @@
+<?html和css, use requestAnimationFrame method./?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <style>
+        .box{
+            background-color: lightblue;
+            height: 20px;
+            line-height: 20px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="300" height="300"></canvas>
+
+<script>
+// see https://www.bryanbraun.com/2021/04/15/ripple-animation-in-javascript/
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const startTime = performance.now();
+
+(function drawRipple(timestamp) {
+  const elapsedTimeUnits = (timestamp - startTime) / 50;
+  const pixelData = ctx.createImageData(canvas.width, canvas.height);
+
+  // Step through the array one pixel at a time
+  for (let i = 0; i < pixelData.data.length; i += 4) {
+
+    // We can find our (x, y) position on the canvas by comparing
+    // our position in the array with the width of the canvas.
+    let x = Math.floor(i / 4) % canvas.width;
+    let y = Math.floor(i / (4 * canvas.width));
+
+    // We need our origin to be in the center, so lets convert the (x, y)
+    // from above (the "canvas coordinates") to their "reindexed" values
+    // (what they would become if the origin were in the center).
+    let reIndexedX = -((canvas.width - x) - (canvas.width / 2));
+    let reIndexedY = (canvas.height - y) - (canvas.height / 2);
+
+    // Instead of writing our own code for Pythagorean's theorem, we can
+    // use JavaScript's built-in method to calculate the hypotenuse.
+    let radialX = Math.hypot(reIndexedX, reIndexedY);
+
+    // For reference, see https://www.desmos.com/calculator/bp9t79pfa0
+    let waveHeight = Math.sin((radialX - elapsedTimeUnits) / 8);
+
+    // Normally, a sin wave fluctuates between -1 and 1, but we want ours
+    // to fluctuate between 0 and 255 instead (the range for RGB values).
+    let adjustedHeight = (waveHeight * 60 + (255/2));
+
+    // Assign the adjustedHeight to R, G, and B equally, to make gray.
+    pixelData.data[i]     = adjustedHeight; // red
+    pixelData.data[i + 1] = adjustedHeight; // green
+    pixelData.data[i + 2] = adjustedHeight; // blue
+    pixelData.data[i + 3] = 255;            // opacity
+  }
+
+  ctx.putImageData(pixelData, 0, 0);
+  
+  requestAnimationFrame(drawRipple);
+})(startTime);
+
+</script>
+</body>
+</html>
