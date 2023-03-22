@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+	<head>
+	<!-- 参考了https://bl.ocks.org/pstuffa/fb6846f64c3b404e29a95a1009c7b332 --> 
+	<meta charset="utf-8">
+	<script src="https://d3js.org/d3.v4.min.js"></script>
+	<style>
+		
+		body {
+			background: url(https://upload.wikimedia.org/wikipedia/commons/7/7e/Vectorscope.jpg) !important;
+			padding: 0px;
+			margin: 0px;
+			vertical-align: center;
+		font-weight: 100 !important;
+		}
+		
+		.axis text {
+		fill: none;
+		}
+		
+		.axis path {
+		stroke: none
+		}
+		
+		.axis line {
+		stroke: #f36f58;
+		stroke-opacity: .75;
+		}
+		
+		svg {
+			
+			padding: 0px;
+			margin: 0px;
+			position: absolute;
+			top: 95px;
+			left: 300px;
+		}
+		.background {
+		fill: #786040 !important;
+		}
+		
+		#chart {
+		text-align: center;
+		}
+		
+		.dots {
+		fill: #fdeae7;
+		}
+		
+		.line {
+		stroke: #22ffc5;
+		stroke-width: 2;
+		stroke-opacity: 1;
+		fill: none;
+			}
+	</style>
+	</head>
+	<body>
+	<div id="chart"> </div>
+	<script>
+		
+		var margin = {top: 20, right: 20, bottom: 20, left: 20},
+			width = 435 - margin.left - margin.right,
+			height = 360 - margin.top - margin.bottom,
+			numTicks = 10,
+			numDashes = 5,
+			numDots = 10;
+			tickSpace = 8;
+
+		var y = d3.scaleLinear()
+			.range([height, 0])
+			.domain([-1,1])
+
+		var x = d3.scaleLinear()
+			.range([0, width])
+			.domain([-1,1])
+		
+		var body = d3.select("#chart").append("svg")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
+		
+		body.append("rect")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
+			.style("fill-opacity", .95)
+			.attr("rx", 10)
+			.attr("class","background");
+		
+
+		
+		var svg = body.append("g")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+		body.append("rect")
+			.attr("filter","url(#spect)")
+			.attr("width", width + margin.left + margin.right)
+			.style("opacity", .3)
+			.attr("height", height + margin.top + margin.bottom);
+		
+		var defs = svg.append("defs");
+
+		var filter = defs.append("filter").attr("id","spect");
+
+		var turbulence = filter.append("feTurbulence")
+			.attr("baseFrequency",".25")
+			.attr("numOctaves","10")
+			.attr("seed", 201);
+
+
+		svg.append("g")
+			.attr("class", "x axis")
+			.attr("transform", "translate(0," + height + ")")
+			.call(d3.axisBottom(x).tickSize(-height).ticks(numTicks))
+			.selectAll("line")
+			.style("stroke-dasharray", function(d,i) { 
+				var dashArray = []
+				for (var k = 0; k < numTicks; k += 1) {
+					dashArray.push((height/numTicks - (tickSpace/2) - (k > 0 ? (tickSpace/2) : 0)));
+					dashArray.push(tickSpace)
+				}      
+				return dashArray.join(",") })
+
+		svg.append("g")
+			.attr("class", "y axis")
+			.call(d3.axisLeft(y).tickSize(-width).ticks(numTicks))
+			.selectAll("line")
+			.style("stroke-dasharray", function(d,i) { 
+				var dashArray = []
+				for (var k = 0; k < numTicks; k += 1) {
+					dashArray.push((width/numTicks - (tickSpace/2) - (k > 0 ? (tickSpace/2) : 0)));
+					dashArray.push(tickSpace)
+				}         
+				return dashArray.join(",") 
+			})
+
+		svg.selectAll(".verticalDashes")
+			.data(d3.range(numTicks*numDashes).map(Object))
+			.enter().append("line")
+			.attr("class", "verticalDashes")
+			.attr("y1", function(d, i) { return i*(height/numTicks/numDashes); } )
+			.attr("y2", function(d, i) { return i*(height/numTicks/numDashes); } )
+			.attr("x1", x(-.025))
+			.attr("x2", x(.025))
+			.style("stroke", "#f25b40")
+			.style("stroke-dasharray", function() {
+				var unit = x(.025) - x(0);
+				return (unit - (tickSpace/4)) + "," + (tickSpace/2) + "," + (unit - (tickSpace/4))
+			})
+
+		svg.selectAll(".horizontalDashes")
+			.data(d3.range(numTicks*numDashes).map(Object))
+			.enter().append("line")
+			.attr("class", "horizontalDashes")
+			.attr("x1", function(d, i) { return i*(width/numTicks/numDashes); } )
+			.attr("x2", function(d, i) { return i*(width/numTicks/numDashes); } )
+			.attr("y1", y(-.025))
+			.attr("y2", y(.025))
+			.style("stroke", "#f25b40")
+			.style("stroke-dasharray", function() {
+				var unit = x(.025) - x(0);
+				return (unit - (tickSpace/4)) + "," + (tickSpace/2) + "," + (unit - (tickSpace/4))
+			})
+
+		svg.selectAll(".rowOne dots")
+			.data(d3.range(numTicks*numDots).map(Object))
+			.enter().append("circle")
+			.attr("class", "rowOne dots")
+			.attr("cx", function(d, i) { return i*(width/numTicks/numDots); } )
+			.attr("cy", function(d, i) { return i % 2 == 0 ? y(.28) : y(-.28) })
+			.attr("r", 1)
+			.style("fill-opacity", .25);
+
+		svg.selectAll(".rowTwo")
+			.data(d3.range(numTicks*numDots).map(Object))
+			.enter().append("circle")
+			.attr("class", "rowTwo dots")
+			.attr("cx", function(d, i) { return i*(width/numTicks/numDots); } )
+			.attr("cy", function(d, i) { return i % 2 == 0 ? y(.44) : y(-.44) })
+			.attr("r", 1)
+			.style("fill-opacity", .25);
+
+		svg.append("clipPath")
+			.attr("id", "clip")
+			.append("rect")
+			.attr("width", width)
+			.attr("height", height);
+
+		var line = d3.line()
+			.curve(d3.curveCardinal)
+			.x(function(d) { return x(d.x); })
+			.y(function(d) { return y(d.y); });
+
+		var data = []
+
+		svg.append("path")
+			.datum(data)
+			.attr("class", "line")
+			.attr("clip-path", "url(#clip)")
+			.attr("d", line)
+			.style("stroke-width", 1)
+
+		var counter = 0;    
+		d3.interval(function(elapsed) {
+
+			data.push({x: counter, y: Math.cos(counter) + (Math.cos(counter/100)*10)});
+			x.domain([0, counter]);
+			y.domain(d3.extent(data, function(d) { return d.y }));
+			d3.select(".x").call(d3.axisBottom(x).tickSize(-height).ticks(numTicks));
+			d3.select(".y").call(d3.axisLeft(y).tickSize(-width).ticks(numTicks));
+			counter += 1;
+			svg.select(".line")
+				.datum(data)
+				.attr("d", line)
+
+		}, 10);
+
+	</script>
+	</body>
+</html>
