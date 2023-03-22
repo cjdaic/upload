@@ -1,4 +1,4 @@
-# upload
+# webmd
 
 This is a student project for easily performing Molecular Dynamics Simulations.
 
